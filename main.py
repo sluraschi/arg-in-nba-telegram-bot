@@ -9,7 +9,8 @@ from Player import Player
 from Team import Team
 
 players = [Player("Deck", 9530711),
-           Player("Campazzo", 3547304)]
+           Player("Campazzo", 3547304),
+           Player("Vildoza", 11314392)]
 
 base_url = "https://free-nba.p.rapidapi.com/"
 get_player_endpoint = "players/"
