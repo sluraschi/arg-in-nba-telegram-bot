@@ -1,7 +1,9 @@
 import requests
 import json
-# import getopt, sys
+import os
 import telebot
+import logging
+import time
 from datetime import date
 from Player import Player
 from Team import Team
@@ -14,17 +16,18 @@ get_player_endpoint = "players/"
 get_matches_endpoint = "games/"
 
 headers = {
-    'x-rapidapi-key': "c3ca4bcdd0msh04115e6644d31dbp16d152jsn7a294e5263c8",
-    }
+    'x-rapidapi-key': os.environ['rapidapi-key']
+}
 
-t_token = "1713690982:AAHxWq50NPijPQqSOJ-9l88V-vZomY5m7dA"
-bot = telebot.TeleBot(t_token, parse_mode=None)
+bot = telebot.TeleBot(os.environ['telegram-token'], parse_mode=None)
+logger = telebot.logger
+telebot.logger.setLevel(logging.DEBUG)  # Outputs debug messages to console.
 
-markup = telebot.types.ReplyKeyboardMarkup(row_width=1)
-itembtn1 = telebot.types.KeyboardButton('/Facu')
-itembtn2 = telebot.types.KeyboardButton('/Tortu')
-itembtn3 = telebot.types.KeyboardButton('Se viene Vildo?')
-markup.add(itembtn1, itembtn2, itembtn3)
+
+def create_keyboard(keyboard):
+    for player_to_add in players:
+        keyboard.add(telebot.types.KeyboardButton(player_to_add.name))
+
 
 def get_team_of_players():
     player_and_teams = {}
@@ -60,40 +63,54 @@ def team_plays(team):
     return None
 
 
-player = "Campazzo"
-teams = get_team_of_players()
-
-
 @bot.message_handler(commands=['start', 'help'])
 def send_welcome(message):
     bot.reply_to(message, "Que crack queres ver hoy?", reply_markup=markup)
 
 
-@bot.message_handler(commands=['Facu'])
-def check_games(message):
-    result = team_plays(teams[player])
-    if result:
-        print("Juega el Facu a las", result["status"])
-        bot.reply_to(message, "Juega el Facu a las " + str(result["status"]))
-    else:
-        print("Hoy no jeuga el Facu :(")
-        bot.reply_to(message, "Hoy no juega el Facu :(")
-
-
 @bot.message_handler(func=lambda message: True)
-def echo_all(message):
-    bot.reply_to(message, "Mandame un comando que conozca, a que crack queres ver?", reply_markup=markup)
+def check_games(message):
+    payload = message.json
+    player_to_search = payload["text"]
+
+    logger.log(logging.INFO, "Message received with ID: " + str(payload["message_id"]))
+    logger.log(logging.INFO, "From user: " + payload["from"]["first_name"] + " " + payload["from"]["last_name"])
+    logger.log(logging.INFO, "On Date: " + str(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(payload["date"]))))
+    logger.log(logging.INFO, "Message: " + player_to_search)
+
+    if player_to_search not in [p.name for p in players]:
+        bot.reply_to(message, player_to_search + " no es un jugador que conozca, solo trabajo con cracks.")
+        return
+
+    match = {}
+    for option in markup.keyboard:
+        if player_to_search == option[0]["text"]:
+            match = team_plays(teams[player_to_search])
+
+    # A helper class can help clean up the if-else
+    if match:
+        if match["period"] > 0:
+            bot.reply_to(message, "El partido de " + player_to_search + " ya empezo! Va por el " + str(match["status"]))
+        else:
+            logger.log(logging.INFO, player_to_search + " juega a las " + str(match["status"]))
+            bot.reply_to(message, player_to_search + " juega a las " + str(match["status"]))
+    else:
+        logger.log(logging.INFO, "Hoy no juega " + player_to_search + " :(")
+        bot.reply_to(message, "Hoy no juega " + player_to_search + " :(")
+
+
+# @bot.message_handler(func=lambda message: True)
+# def echo_all(message):
+#     bot.reply_to(message, "Mandame un jugador que conozca, a que crack queres ver?", reply_markup=markup)
+
+
+markup = telebot.types.ReplyKeyboardMarkup(row_width=1)
+create_keyboard(markup)
+teams = get_team_of_players()
 
 
 def main():
-    # short_options = "p:"
-    # long_options = ["player="]
-
-    # if ("Facu")
-    # result = team_plays(teams[player])
-    # if result:
-    #     print("Juega el Facu a las", result["status"])
-
+    # check_games("Deck")
     bot.polling()
 
 
