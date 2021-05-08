@@ -22,7 +22,7 @@ headers = {
 
 bot = telebot.TeleBot(os.environ['telegram-token'], parse_mode=None)
 logger = telebot.logger
-telebot.logger.setLevel(logging.DEBUG)  # Outputs debug messages to console.
+telebot.logger.setLevel(logging.INFO)  # Outputs debug messages to console.
 
 
 def create_keyboard(keyboard):
