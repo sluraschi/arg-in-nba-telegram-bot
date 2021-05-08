@@ -75,7 +75,7 @@ def check_games(message):
     player_to_search = payload["text"]
 
     logger.log(logging.INFO, "Message received with ID: " + str(payload["message_id"]))
-    logger.log(logging.INFO, "From user with ID: " + payload["from"]["id"])
+    logger.log(logging.INFO, "From user with ID: " + str(payload["from"]["id"]))
     logger.log(logging.INFO, "On Date: " + str(time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(payload["date"]))))
     logger.log(logging.INFO, "Message: " + player_to_search)
 
