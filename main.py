@@ -80,7 +80,7 @@ def check_games(message):
     logger.log(logging.INFO, "Message: " + player_to_search)
 
     if player_to_search not in [p.name for p in players]:
-        bot.reply_to(message, player_to_search + " no es un jugador que conozca, solo trabajo con cracks.")
+        bot.reply_to(message, player_to_search + " no es un jugador que conozca, solo trabajo con cracks.", reply_markup=markup)
         return
 
     match = {}
@@ -91,13 +91,13 @@ def check_games(message):
     # A helper class can help clean up the if-else
     if match:
         if match["period"] > 0:
-            bot.reply_to(message, "El partido de " + player_to_search + " ya empezo! Va por el " + str(match["status"]))
+            bot.reply_to(message, "El partido de " + player_to_search + " ya empezo! Va por el " + str(match["status"]), reply_markup=markup)
         else:
             logger.log(logging.INFO, player_to_search + " juega a las " + str(match["status"]))
-            bot.reply_to(message, player_to_search + " juega a las " + str(match["status"]))
+            bot.reply_to(message, player_to_search + " juega a las " + str(match["status"]), reply_markup=markup)
     else:
         logger.log(logging.INFO, "Hoy no juega " + player_to_search + " :(")
-        bot.reply_to(message, "Hoy no juega " + player_to_search + " :(")
+        bot.reply_to(message, "Hoy no juega " + player_to_search + " :(", reply_markup=markup)
 
 
 # @bot.message_handler(func=lambda message: True)
